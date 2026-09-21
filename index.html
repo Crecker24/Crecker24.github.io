@@ -121,6 +121,7 @@
             <button type="button" class="close-form-btn" id="close-form">×</button>
 
             <form class="habit-form" id="habit-form">
+                <div id="form-message" class="form-message" role="alert" hidden></div>
                 <input
                     id="habit-title"
                     type="text"
@@ -182,5 +183,24 @@
             </form>
         </div>
     </div>
+    <div class="modal name-modal" id="name-modal">
+    <div class="form-wrapper">
+        <form class="habit-form" id="name-form">
+        <h2>Добро пожаловать!</h2>
+        <p>Как вас зовут?</p>
+
+        <label for="user-name">Ваше имя</label>
+        <input
+            id="user-name"
+            type="text"
+            required
+            minlength="2"
+            autocomplete="name"
+        >
+
+        <button type="submit">Начать</button>
+        </form>
+    </div>
+</div>
 </body>
 </html>

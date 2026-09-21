@@ -46,14 +46,25 @@ export function formatRepeatDays(days) {
     return days.map((day) => dayNames[day]).join(", ");
 }
 
-export function getCompletionForDate(habits, date = new Date()) {
-    const dayKey = getDayKey(date);
-    const dateKey = getDateKey(date);
-    const plannedHabits = habits.filter((habit) => habit.days.includes(dayKey));
-    const completedHabits = plannedHabits.filter((habit) => habit.completedDates?.includes(dateKey) ?? false);
+export function isHabitActiveOnDate(habit, date) {
+    return getDateKey(date) >= habit.createdAt;
+}
 
-    return {
-        completedHabits: completedHabits.length,
-        plannedHabits: plannedHabits.length
-    };
+export function getCompletionForDate(habits, date = new Date()) {
+  const dayKey = getDayKey(date);
+  const dateKey = getDateKey(date);
+
+  const plannedHabits = habits.filter((habit) =>
+    habit.days.includes(dayKey) &&
+    isHabitActiveOnDate(habit, date)
+  );
+
+  const completedHabits = plannedHabits.filter((habit) =>
+    habit.completedDates?.includes(dateKey) ?? false
+  );
+
+  return {
+    completedHabits: completedHabits.length,
+    plannedHabits: plannedHabits.length
+  };
 }

@@ -12,7 +12,11 @@ export function loadHabits() {
 }
 
 export function saveHabits(habits) {
+  try {
     localStorage.setItem(HABITS_KEY, JSON.stringify(habits));
+  } catch {
+    throw new Error("Не удалось сохранить привычки в браузере.");
+  }
 }
 
 export function loadUserName() {

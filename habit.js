@@ -1,4 +1,4 @@
-import { formatRepeatDays, goalRu } from "./function.js";
+import { formatRepeatDays, getDateKey, goalRu } from "./function.js";
 import { loadHabits, saveHabits } from "./storage.js";
 
 const habitList = document.querySelector("#habits-list");
@@ -8,10 +8,21 @@ const form = document.querySelector("#habit-form");
 const openButton = document.querySelector("#open-form");
 const closeButton = document.querySelector("#close-form");
 const submitButton = form.querySelector("button[type='submit']");
+const formMessage = document.querySelector("#form-message");
 
 let habits = loadHabits();
 let selectedGoal = "all";
 let editingHabitId = null;
+
+function showFormMessage(message) {
+  formMessage.textContent = message;
+  formMessage.hidden = false;
+}
+
+function clearFormMessage() {
+  formMessage.textContent = "";
+  formMessage.hidden = true;
+}
 
 function getNextId() {
     return habits.length === 0 ? 1 : Math.max(...habits.map((habit) => habit.id)) + 1;
@@ -44,6 +55,7 @@ function renderHabits() {
 }
 
 function openCreateModal() {
+    clearFormMessage();
     editingHabitId = null;
     form.reset();
     submitButton.textContent = "Добавить";
@@ -51,6 +63,7 @@ function openCreateModal() {
 }
 
 function openEditModal(id) {
+    clearFormMessage();
     const habit = habits.find((item) => item.id === id);
     if (!habit) return;
     editingHabitId = id;
@@ -73,7 +86,10 @@ modal.addEventListener("click", (event) => {
 form.addEventListener("submit", (event) => {
     event.preventDefault();
     const days = [...document.querySelectorAll("input[name='days']:checked")].map((checkbox) => checkbox.value);
-    if (!days.length) return alert("Выберите хотя бы один день.");
+    if (!days.length) {
+        showFormMessage("Выберите хотя бы один день выполнения.");
+        return;
+    };
 
     const data = {
         title: document.querySelector("#habit-title").value.trim(),
@@ -83,7 +99,12 @@ form.addEventListener("submit", (event) => {
     };
 
     if (editingHabitId === null) {
-        habits.push({ id: getNextId(), ...data, completedDates: [] });
+        habits.push({
+            id: getNextId(),
+            ...data,
+            completedDates: [],
+            createdAt: getDateKey(new Date())
+        });
     } else {
         const habit = habits.find((item) => item.id === editingHabitId);
         if (habit) Object.assign(habit, data);

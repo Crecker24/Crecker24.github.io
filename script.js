@@ -9,6 +9,10 @@ const habitList = document.querySelector("#today-habits-list");
 const weeklyCalendar = document.querySelector(".progress-calendar-list");
 const goalList = document.querySelector("#goals-list");
 const editNameButton = document.querySelector("#edit-btn");
+const formMessage = document.querySelector("#form-message");
+const nameModal = document.querySelector("#name-modal");
+const nameForm = document.querySelector("#name-form");
+const nameInput = document.querySelector("#user-name");
 
 let habits = loadHabits();
 let userName = loadUserName();
@@ -78,16 +82,25 @@ function renderWeeklyProgress() {
 }
 
 function renderStreak() {
-    const streakText = document.querySelector(".progress-streak-info");
-    let date = new Date();
-    let streak = 0;
-    for (let index = 0; index < 365; index++) {
-        const stats = getCompletionForDate(habits, date);
-        if (stats.plannedHabits > 0 && stats.completedHabits !== stats.plannedHabits) break;
-        streak++;
-        date = addDays(date, -1);
+  const streakText = document.querySelector(".progress-streak-info");
+  let date = new Date();
+  let streak = 0;
+
+  for (let index = 0; index < 365; index++) {
+    const stats = getCompletionForDate(habits, date);
+
+    if (
+      stats.plannedHabits === 0 ||
+      stats.completedHabits !== stats.plannedHabits
+    ) {
+      break;
     }
-    streakText.textContent = `Серия выполнения привычек: ${streak} дней`;
+
+    streak++;
+    date = addDays(date, -1);
+  }
+
+  streakText.textContent = `Серия выполнения привычек: ${streak} дней`;
 }
 
 function renderCurrentWeek() {
@@ -138,6 +151,7 @@ function renderHabits() {
 }
 
 openButton.addEventListener("click", () => {
+    clearFormMessage();
     habitForm.reset();
     modal.classList.add("is-open");
 });
@@ -149,19 +163,39 @@ modal.addEventListener("click", (event) => {
 habitForm.addEventListener("submit", (event) => {
     event.preventDefault();
     const days = [...document.querySelectorAll("input[name='days']:checked")].map((checkbox) => checkbox.value);
-    if (!days.length) return alert("Выберите хотя бы один день.");
+    if (!days.length) {
+        showFormMessage("Выберите хотя бы один день выполнения.");
+        return;
+    };
     habits.push({
         id: getNextId(),
         title: document.querySelector("#habit-title").value.trim(),
         goal: document.querySelector("#habit-goal").value,
         days,
         time: document.querySelector("#habit-time").value,
-        completedDates: []
+        completedDates: [],
+        createdAt: getDateKey(new Date())
     });
-    saveHabits(habits);
+    try {
+        saveHabits(habits);
+        showFormMessage("Привычка успешно добавлена.", "success");
+    } catch (error) {
+        showFormMessage(error.message);
+        return;
+    }
     modal.classList.remove("is-open");
     renderHabits();
 });
+
+function showFormMessage(message) {
+  formMessage.textContent = message;
+  formMessage.hidden = false;
+}
+
+function clearFormMessage() {
+  formMessage.textContent = "";
+  formMessage.hidden = true;
+}
 
 habitList.addEventListener("click", (event) => {
     const button = event.target.closest(".completed-btn");
@@ -188,12 +222,36 @@ editNameButton.addEventListener("click", () => {
     renderGreeting();
 });
 
-if (!userName) {
-    const answer = prompt("Как тебя зовут?");
-    if (answer?.trim()) {
-        userName = answer.trim();
-        saveUserName(userName);
+nameForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const name = nameInput.value.trim();
+
+    if (name.length < 2) {
+        return;
     }
+
+    userName = name;
+    saveUserName(userName);
+
+    nameModal.classList.remove("is-open");
+    renderGreeting();
+});
+
+if (!userName) {
+    nameModal.classList.add("is-open");
+    nameInput.focus();
+}
+
+function showMessage(message, type = "error") {
+  messageElement.textContent = message;
+  messageElement.className = `app-message app-message--${type}`;
+  messageElement.hidden = false;
+}
+
+function clearMessage() {
+  messageElement.textContent = "";
+  messageElement.hidden = true;
 }
 
 renderGreeting();

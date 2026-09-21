@@ -889,3 +889,17 @@ select:focus-visible {
         height: 30px;
     }
 }
+
+.form-message {
+  padding: 10px 12px;
+  border: 1px solid #e8bdb8;
+  border-radius: 10px;
+  color: #8b2720;
+  background-color: #fbe4e1;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.name-modal {
+  z-index: 2000;
+}
